@@ -1,4 +1,14 @@
-import { defineStack } from 'sst/constructs';
-import { MyStack } from './stacks/MyStack';
+import { SSTConfig } from "sst";
+import { MyStack } from "./stacks/MyStack";
 
-export default defineStack(MyStack);
+export default {
+  config() {
+    return {
+      name: "reflect-therapy",
+      region: "ap-southeast-2",
+    };
+  },
+  stacks(app) {
+    app.stack(MyStack);
+  },
+} satisfies SSTConfig;
