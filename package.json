@@ -1,0 +1,30 @@
+{
+  "name": "reflect-therapy",
+  "version": "1.0.0",
+  "description": "Therapist booking site",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "sst": "sst deploy",
+    "test": "c8 mocha -r ts-node/register -r ./test/setup.js \"test/**/*.test.ts\" --reporter spec"
+  },
+  "dependencies": {
+    "next": "14.1.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "3.3.5",
+    "@types/react": "18.2.0",
+    "@types/node": "20.5.0",
+    "twilio": "4.15.3",
+    "sst": "2.32.0",
+    "swr": "2.2.0"
+  },
+  "devDependencies": {
+    "typescript": "5.4.5",
+    "mocha": "10.2.0",
+    "c8": "8.0.1",
+    "sinon": "17.0.1",
+    "ts-node": "10.9.1"
+  }
+}
