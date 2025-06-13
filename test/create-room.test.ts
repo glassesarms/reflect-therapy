@@ -24,11 +24,12 @@ describe('create-room API', () => {
     assert.equal(res.status, 404);
   });
 
-  it('rejects creating too early', async () => {
+  it('creates room even if too early', async () => {
     bookings.push({ id: '2', date: '2099-01-01', time: '10:00', notes: 'n' });
     const req = new NextRequest('http://test', { body: JSON.stringify({ id: '2' }) });
     const res: any = await POST(req);
-    assert.equal(res.status, 400);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.url, 'https://video.twilio.com/v1/Rooms/RM_TEST');
   });
 
   it('returns existing room url', async () => {

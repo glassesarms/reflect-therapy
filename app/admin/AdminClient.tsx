@@ -16,8 +16,12 @@ export default function AdminClient() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
     });
-    const { url } = await res.json();
+    const { url, error } = await res.json();
     mutate();
+    if (!res.ok || !url) {
+      alert(error || 'Failed to create room');
+      return;
+    }
     router.push(`/room?url=${encodeURIComponent(url)}`);
   };
 
@@ -37,7 +41,16 @@ export default function AdminClient() {
               </div>
               <div className="text-sm text-muted-foreground mb-2">{b.notes}</div>
               {!b.roomUrl ? (
-                <Button size="sm" onClick={() => createRoom(b.id)}>
+                <Button
+                  size="sm"
+                  onClick={() => createRoom(b.id)}
+                  variant={
+                    new Date(`${b.date}T${b.time}:00Z`).getTime() - Date.now() >
+                    15 * 60 * 1000
+                      ? 'secondary'
+                      : 'default'
+                  }
+                >
                   Create Room
                 </Button>
               ) : (
