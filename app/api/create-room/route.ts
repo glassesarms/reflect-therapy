@@ -27,9 +27,21 @@ export async function POST(req: NextRequest) {
       uniqueName: id,
     });
 
-    const roomUrl = room.url;
-    await setRoomUrl(id, roomUrl);
-    return NextResponse.json({ url: roomUrl });
+    const AccessToken = twilio.jwt.AccessToken;
+    const VideoGrant = AccessToken.VideoGrant;
+    const token = new AccessToken(
+      process.env.TWILIO_SID!,
+      process.env.TWILIO_SID!,
+      process.env.TWILIO_TOKEN!,
+      { identity: `admin-${id}` }
+    );
+    token.addGrant(new VideoGrant({ room: room.sid }));
+    const joinUrl = `/video.html?room=${encodeURIComponent(
+      room.sid
+    )}&token=${encodeURIComponent(token.toJwt())}`;
+
+    await setRoomUrl(id, joinUrl);
+    return NextResponse.json({ url: joinUrl });
   } catch (err: any) {
     console.error('Twilio create room failed', err);
     const message = err && typeof err === 'object' && 'message' in err ? err.message : 'Failed to create room';
