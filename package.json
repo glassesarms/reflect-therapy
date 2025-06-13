@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "sst": "sst deploy",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "c8 mocha -r ts-node/register -r ./test/setup.js \"test/**/*.test.ts\" --reporter spec"
   },
   "dependencies": {
     "next": "14.1.0",
@@ -21,6 +21,10 @@
     "swr": "2.2.0"
   },
   "devDependencies": {
-    "typescript": "5.4.5"
+    "typescript": "5.4.5",
+    "mocha": "10.2.0",
+    "c8": "8.0.1",
+    "sinon": "17.0.1",
+    "ts-node": "10.9.1"
   }
 }

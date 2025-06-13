@@ -31,3 +31,4 @@ npm run sst
 ## GitHub Actions
 
 A basic workflow is provided in `.github/workflows/deploy.yml` to deploy to AWS on push to `main`.
+By default it deploys to the `ap-southeast-2` region; adjust the `AWS_REGION` value if you need a different region.
