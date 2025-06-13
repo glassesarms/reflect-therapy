@@ -8,8 +8,12 @@ export function MyStack({ stack }: StackContext) {
     primaryIndex: { partitionKey: 'id' },
   });
 
-  new NextjsSite(stack, 'Site', {
+  const site = new NextjsSite(stack, 'Site', {
     path: '.',
     bind: [table],
+  });
+
+  stack.addOutputs({
+    SiteUrl: site.url,
   });
 }
