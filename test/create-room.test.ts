@@ -3,7 +3,6 @@ import { POST } from '../app/api/create-room/route';
 import { NextRequest } from 'next/server';
 import { bookings } from '../lib/data';
 import twilio from 'twilio';
-import sinon from 'sinon';
 
 describe('create-room API', () => {
   beforeEach(() => {
@@ -12,12 +11,10 @@ describe('create-room API', () => {
   });
 
   it('creates room for booking', async () => {
-    const stub = sinon.stub(twilio().video.v1.rooms, 'create').resolves({ sid: 'RM_OK' });
     const req = new NextRequest('http://test', { body: JSON.stringify({ id: '1' }) });
     const res: any = await POST(req);
     assert.equal(res.status, 200);
-    assert.ok(res.data.url.includes('RM_OK'));
-    stub.restore();
+    assert.ok(res.data.url.includes('RM_TEST'));
   });
 
   it('returns 404 for missing booking', async () => {

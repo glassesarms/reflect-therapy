@@ -4,10 +4,18 @@ This is a template Next.js site for online therapy sessions. It includes a simpl
 
 ## Setup
 
-1. Install dependencies
+Make sure you have pnpm available. If you use Node 16+ you can run:
 
 ```bash
-npm install
+corepack enable
+```
+
+Or install it globally via `npm install -g pnpm`.
+
+1. Install dependencies using [pnpm](https://pnpm.io)
+
+```bash
+pnpm install
 ```
 
 2. Copy the example environment file and fill in your secrets:
@@ -19,13 +27,19 @@ cp .env.example .env
 3. Run the development server
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 4. Deploy with SST
 
 ```bash
-npm run sst
+pnpm run sst
+```
+
+5. Run the test suite
+
+```bash
+pnpm test
 ```
 
 ## GitHub Actions
