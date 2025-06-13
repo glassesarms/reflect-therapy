@@ -15,7 +15,10 @@ describe('create-room API', () => {
     const req = new NextRequest('http://test', { body: JSON.stringify({ id: '1' }) });
     const res: any = await POST(req);
     assert.equal(res.status, 200);
-    assert.equal(res.data.url, 'https://video.twilio.com/v1/Rooms/RM_TEST');
+    assert.equal(
+      res.data.url,
+      '/video.html?room=RM_TEST&token=TOKEN'
+    );
   });
 
   it('returns 404 for missing booking', async () => {
@@ -29,7 +32,10 @@ describe('create-room API', () => {
     const req = new NextRequest('http://test', { body: JSON.stringify({ id: '2' }) });
     const res: any = await POST(req);
     assert.equal(res.status, 200);
-    assert.equal(res.data.url, 'https://video.twilio.com/v1/Rooms/RM_TEST');
+    assert.equal(
+      res.data.url,
+      '/video.html?room=RM_TEST&token=TOKEN'
+    );
   });
 
   it('returns existing room url', async () => {
