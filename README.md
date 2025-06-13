@@ -24,6 +24,17 @@ pnpm install
 cp .env.example .env
 ```
 
+Add the required values to `.env`:
+
+```dotenv
+ADMIN_PASSWORD=your_admin_password
+TWILIO_SID=your_twilio_account_sid
+TWILIO_TOKEN=your_twilio_auth_token
+BOOKINGS_TABLE_NAME=name_of_dynamodb_table
+```
+
+When deploying via GitHub Actions, include the same variables as repository secrets so the site can access them in production.
+
 3. Run the development server
 
 ```bash
