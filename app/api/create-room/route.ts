@@ -11,10 +11,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: booking.roomUrl });
   }
 
-  const bookingTime = new Date(`${booking.date}T${booking.time}:00`);
-  if (bookingTime.getTime() - Date.now() > 15 * 60 * 1000) {
-    return NextResponse.json({ error: 'Too early' }, { status: 400 });
-  }
 
   if (!process.env.TWILIO_SID || !process.env.TWILIO_TOKEN) {
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
@@ -34,7 +30,9 @@ export async function POST(req: NextRequest) {
     const roomUrl = room.url;
     await setRoomUrl(id, roomUrl);
     return NextResponse.json({ url: roomUrl });
-  } catch (err) {
-    return NextResponse.json({ error: 'Failed to create room' }, { status: 500 });
+  } catch (err: any) {
+    console.error('Twilio create room failed', err);
+    const message = err && typeof err === 'object' && 'message' in err ? err.message : 'Failed to create room';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
