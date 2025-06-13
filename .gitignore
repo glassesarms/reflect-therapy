@@ -1,0 +1,29 @@
+# Node dependencies
+node_modules/
+.pnpm/
+.pnpm-debug.log*
+
+# Build outputs
+.next/
+out/
+dist/
+
+# SST build artifacts
+.stacks/
+.sst/
+
+# Environment files
+.env
+.env.*
+
+# Logs and coverage
+*.log
+coverage/
+
+# Editor directories
+.vscode/
+.idea/
+
+# pnpm lockfile
+pnpm-lock.yaml
+.DS_Store
