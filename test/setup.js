@@ -12,6 +12,8 @@ Module._resolveFilename = function(request, parent, isMain, options) {
 };
 
 process.env.NODE_ENV = 'test';
-process.env.TWILIO_SID = 'test';
-process.env.TWILIO_TOKEN = 'test';
+process.env.TWILIO_ACCOUNT_SID = 'test';
+process.env.TWILIO_AUTH_TOKEN = 'test';
+process.env.TWILIO_API_KEY = 'test';
+process.env.TWILIO_API_SECRET = 'test';
 process.env.TZ = 'UTC';
