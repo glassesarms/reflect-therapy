@@ -1,5 +1,7 @@
 'use client';
-import useSWR from 'swr';
+import useSWR from 'swr'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -17,28 +19,32 @@ export default function AdminPage() {
     mutate();
   };
 
-  if (!data) return <p>Loading...</p>;
+  if (!data) return <p>Loading...</p>
 
   return (
     <main className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Bookings</h1>
-      <ul className="space-y-2">
-        {data.map((b: any) => (
-          <li key={b.id} className="border p-2">
-            <div>{b.date} {b.time}</div>
-            <div>{b.notes}</div>
-            {!b.roomUrl && (
-              <button
-                className="bg-green-600 text-white px-2 py-1 mt-2"
-                onClick={() => createRoom(b.id)}
-              >
-                Create Room
-              </button>
-            )}
-            {b.roomUrl && <div>Room: {b.roomUrl}</div>}
-          </li>
-        ))}
-      </ul>
+      <Card>
+        <CardHeader>
+          <CardTitle>Bookings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {data.map((b: any) => (
+            <Card key={b.id} className="border p-4">
+              <div className="font-medium">
+                {b.date} {b.time}
+              </div>
+              <div className="text-sm text-muted-foreground mb-2">{b.notes}</div>
+              {!b.roomUrl ? (
+                <Button size="sm" onClick={() => createRoom(b.id)}>
+                  Create Room
+                </Button>
+              ) : (
+                <div className="text-sm break-all">Room: {b.roomUrl}</div>
+              )}
+            </Card>
+          ))}
+        </CardContent>
+      </Card>
     </main>
-  );
+  )
 }
