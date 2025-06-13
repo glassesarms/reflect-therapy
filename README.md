@@ -28,8 +28,10 @@ Add the required values to `.env`:
 
 ```dotenv
 ADMIN_PASSWORD=your_admin_password
-TWILIO_SID=your_twilio_account_sid
-TWILIO_TOKEN=your_twilio_auth_token
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_API_KEY=your_api_key_sid
+TWILIO_API_SECRET=your_api_key_secret
 BOOKINGS_TABLE_NAME=name_of_dynamodb_table
 ```
 

@@ -12,13 +12,18 @@ export async function POST(req: NextRequest) {
   }
 
 
-  if (!process.env.TWILIO_SID || !process.env.TWILIO_TOKEN) {
+  if (
+    !process.env.TWILIO_ACCOUNT_SID ||
+    !process.env.TWILIO_AUTH_TOKEN ||
+    !process.env.TWILIO_API_KEY ||
+    !process.env.TWILIO_API_SECRET
+  ) {
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
   }
 
   const twilioClient = twilio(
-    process.env.TWILIO_SID,
-    process.env.TWILIO_TOKEN
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
   );
 
   try {
@@ -30,9 +35,9 @@ export async function POST(req: NextRequest) {
     const AccessToken = twilio.jwt.AccessToken;
     const VideoGrant = AccessToken.VideoGrant;
     const token = new AccessToken(
-      process.env.TWILIO_SID!,
-      process.env.TWILIO_SID!,
-      process.env.TWILIO_TOKEN!,
+      process.env.TWILIO_ACCOUNT_SID!,
+      process.env.TWILIO_API_KEY!,
+      process.env.TWILIO_API_SECRET!,
       { identity: `admin-${id}` }
     );
     token.addGrant(new VideoGrant({ room: room.sid }));
