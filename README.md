@@ -46,3 +46,19 @@ pnpm test
 
 A basic workflow is provided in `.github/workflows/deploy.yml` to deploy to AWS on push to `main`.
 By default it deploys to the `ap-southeast-2` region; adjust the `AWS_REGION` value if you need a different region.
+
+## AWS credentials
+
+To deploy through GitHub Actions or from your local machine you need an AWS access key.
+Create an IAM user with **programmatic access** in the AWS console and attach the
+`AdministratorAccess` policy (or a more restricted policy of your choice).
+
+Steps:
+
+1. Sign in to the AWS console and open **IAM → Users**.
+2. Choose **Add users** and enable *Access key - Programmatic access*.
+3. Attach the desired permissions policy.
+4. After creating the user, download the Access Key ID and Secret Access Key.
+5. Add these values as GitHub repository secrets named `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+
+Use the same keys locally by exporting them in your shell or placing them in the `.env` file when running SST commands.

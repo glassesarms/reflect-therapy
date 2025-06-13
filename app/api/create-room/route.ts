@@ -1,22 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { bookings } from '../../../lib/data';
+import { getBooking, setRoomUrl } from '../../../lib/data';
 import twilio from 'twilio';
 
 export async function POST(req: NextRequest) {
   const { id } = await req.json();
-  const booking = bookings.find(b => b.id === id);
+  const booking = await getBooking(id);
   if (!booking) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
+  if (booking.roomUrl) {
+    return NextResponse.json({ url: booking.roomUrl });
+  }
+
+  const bookingTime = new Date(`${booking.date}T${booking.time}:00`);
+  if (bookingTime.getTime() - Date.now() > 15 * 60 * 1000) {
+    return NextResponse.json({ error: 'Too early' }, { status: 400 });
+  }
+
+  if (!process.env.TWILIO_SID || !process.env.TWILIO_TOKEN) {
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+  }
+
   const twilioClient = twilio(
-    process.env.TWILIO_SID!,
-    process.env.TWILIO_TOKEN!
+    process.env.TWILIO_SID,
+    process.env.TWILIO_TOKEN
   );
 
-  const room = await twilioClient.video.v1.rooms.create({
-    uniqueName: id,
-    type: 'go',
-  });
+  try {
+    const room = await twilioClient.video.v1.rooms.create({
+      uniqueName: id,
+      type: 'go',
+    });
 
-  booking.roomUrl = `https://video.twilio.com/v1/Rooms/${room.sid}`;
-  return NextResponse.json({ url: booking.roomUrl });
+    const roomUrl = room.url;
+    await setRoomUrl(id, roomUrl);
+    return NextResponse.json({ url: roomUrl });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to create room' }, { status: 500 });
+  }
 }

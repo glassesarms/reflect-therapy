@@ -10,3 +10,7 @@ Module._resolveFilename = function(request, parent, isMain, options) {
   }
   return originalResolve.call(this, request, parent, isMain, options);
 };
+
+process.env.NODE_ENV = 'test';
+process.env.TWILIO_SID = 'test';
+process.env.TWILIO_TOKEN = 'test';

@@ -7,19 +7,36 @@ import twilio from 'twilio';
 describe('create-room API', () => {
   beforeEach(() => {
     bookings.length = 0;
-    bookings.push({ id: '1', date: 'd', time: 't', notes: 'n' });
   });
 
   it('creates room for booking', async () => {
+    const now = new Date(Date.now() + 5 * 60 * 1000);
+    bookings.push({ id: '1', date: now.toISOString().slice(0,10), time: now.toISOString().slice(11,16), notes: 'n' });
     const req = new NextRequest('http://test', { body: JSON.stringify({ id: '1' }) });
     const res: any = await POST(req);
     assert.equal(res.status, 200);
-    assert.ok(res.data.url.includes('RM_TEST'));
+    assert.equal(res.data.url, 'https://video.twilio.com/v1/Rooms/RM_TEST');
   });
 
   it('returns 404 for missing booking', async () => {
     const req = new NextRequest('http://test', { body: JSON.stringify({ id: 'x' }) });
     const res: any = await POST(req);
     assert.equal(res.status, 404);
+  });
+
+  it('rejects creating too early', async () => {
+    bookings.push({ id: '2', date: '2099-01-01', time: '10:00', notes: 'n' });
+    const req = new NextRequest('http://test', { body: JSON.stringify({ id: '2' }) });
+    const res: any = await POST(req);
+    assert.equal(res.status, 400);
+  });
+
+  it('returns existing room url', async () => {
+    const now = new Date();
+    bookings.push({ id: '3', date: now.toISOString().slice(0,10), time: now.toISOString().slice(11,16), notes: 'n', roomUrl: 'foo' });
+    const req = new NextRequest('http://test', { body: JSON.stringify({ id: '3' }) });
+    const res: any = await POST(req);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.url, 'foo');
   });
 });
