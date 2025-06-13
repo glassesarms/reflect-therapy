@@ -11,10 +11,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: booking.roomUrl });
   }
 
-  const bookingTime = new Date(`${booking.date}T${booking.time}:00`);
-  if (bookingTime.getTime() - Date.now() > 15 * 60 * 1000) {
-    return NextResponse.json({ error: 'Too early' }, { status: 400 });
-  }
 
   if (!process.env.TWILIO_SID || !process.env.TWILIO_TOKEN) {
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
