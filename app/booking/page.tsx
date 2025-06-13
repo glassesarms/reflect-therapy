@@ -1,5 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState } from 'react'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 
 export default function BookingPage() {
   const [date, setDate] = useState('');
@@ -18,32 +23,49 @@ export default function BookingPage() {
 
   return (
     <main className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Book a Session</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <input
-          type="date"
-          className="border p-2 w-full"
-          value={date}
-          onChange={e => setDate(e.target.value)}
-          required
-        />
-        <input
-          type="time"
-          className="border p-2 w-full"
-          value={time}
-          onChange={e => setTime(e.target.value)}
-          required
-        />
-        <textarea
-          className="border p-2 w-full"
-          placeholder="Notes"
-          value={notes}
-          onChange={e => setNotes(e.target.value)}
-        />
-        <button className="bg-blue-500 text-white px-4 py-2" type="submit">
-          Book
-        </button>
-      </form>
+      <Card className="max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Book a Session</CardTitle>
+        </CardHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="time">Time</Label>
+              <Input
+                id="time"
+                type="time"
+                value={time}
+                onChange={e => setTime(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder="Notes"
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" className="ml-auto">
+              Book
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
     </main>
-  );
+  )
 }

@@ -1,6 +1,10 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export default function LoginPage() {
   const [password, setPassword] = useState('');
@@ -19,19 +23,30 @@ export default function LoginPage() {
 
   return (
     <main className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Therapist Login</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <input
-          type="password"
-          className="border p-2 w-full"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
-        <button className="bg-blue-500 text-white px-4 py-2" type="submit">
-          Login
-        </button>
-      </form>
+      <Card className="max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Therapist Login</CardTitle>
+        </CardHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" className="ml-auto">
+              Login
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
     </main>
-  );
+  )
 }

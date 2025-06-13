@@ -10,24 +10,29 @@
     "test": "c8 mocha -r ts-node/register -r ./test/setup.js \"test/**/*.test.ts\" --reporter spec"
   },
   "dependencies": {
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@types/node": "20.5.0",
+    "@types/react": "18.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "next": "14.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "tailwindcss": "3.3.5",
-    "@types/react": "18.2.0",
-    "@types/node": "20.5.0",
-    "twilio": "4.15.0",
     "sst": "2.32.0",
-    "swr": "2.2.0"
+    "swr": "2.2.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "3.3.5",
+    "twilio": "4.15.0"
   },
   "devDependencies": {
-    "typescript": "5.4.5",
-    "mocha": "10.2.0",
-    "c8": "8.0.1",
-    "sinon": "17.0.1",
-    "ts-node": "10.9.1",
     "@types/mocha": "10.0.6",
     "@types/sinon": "17.0.4",
-    "autoprefixer": "^10.4.17"
+    "autoprefixer": "^10.4.17",
+    "c8": "8.0.1",
+    "mocha": "10.2.0",
+    "sinon": "17.0.1",
+    "ts-node": "10.9.1",
+    "typescript": "5.4.5"
   }
 }
