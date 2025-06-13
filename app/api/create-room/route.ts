@@ -30,7 +30,9 @@ export async function POST(req: NextRequest) {
     const roomUrl = room.url;
     await setRoomUrl(id, roomUrl);
     return NextResponse.json({ url: roomUrl });
-  } catch (err) {
-    return NextResponse.json({ error: 'Failed to create room' }, { status: 500 });
+  } catch (err: any) {
+    console.error('Twilio create room failed', err);
+    const message = err && typeof err === 'object' && 'message' in err ? err.message : 'Failed to create room';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
