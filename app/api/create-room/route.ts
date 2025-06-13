@@ -22,9 +22,9 @@ export async function POST(req: NextRequest) {
   );
 
   try {
+    // omit deprecated room type so Twilio uses the default "group" room
     const room = await twilioClient.video.v1.rooms.create({
       uniqueName: id,
-      type: 'go',
     });
 
     const roomUrl = room.url;
