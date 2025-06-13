@@ -11,6 +11,11 @@ export function MyStack({ stack }: StackContext) {
   const site = new NextjsSite(stack, 'Site', {
     path: '.',
     bind: [table],
+    environment: {
+      ADMIN_PASSWORD: process.env.ADMIN_PASSWORD!,
+      TWILIO_SID: process.env.TWILIO_SID!,
+      TWILIO_TOKEN: process.env.TWILIO_TOKEN!,
+    },
   });
 
   stack.addOutputs({
