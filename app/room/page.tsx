@@ -1,8 +1,9 @@
 'use client';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
-export default function RoomPage() {
+function RoomContent() {
   const params = useSearchParams();
   const url = params.get('url');
 
@@ -22,5 +23,13 @@ export default function RoomPage() {
         allow="camera; microphone"
       />
     </main>
+  );
+}
+
+export default function RoomPage() {
+  return (
+    <Suspense>
+      <RoomContent />
+    </Suspense>
   );
 }
