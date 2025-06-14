@@ -42,9 +42,9 @@ function RoomContent() {
 
     async function start() {
       const devices = await meetingSession.audioVideo.listVideoInputDevices();
-      if (devices[0]) await meetingSession.audioVideo.chooseVideoInputDevice(devices[0].deviceId);
+      if (devices[0]) await meetingSession.audioVideo.startVideoInput(devices[0].deviceId);
       const audio = await meetingSession.audioVideo.listAudioInputDevices();
-      if (audio[0]) await meetingSession.audioVideo.chooseAudioInputDevice(audio[0].deviceId);
+      if (audio[0]) await meetingSession.audioVideo.startAudioInput(audio[0].deviceId);
       meetingSession.audioVideo.start();
       meetingSession.audioVideo.startLocalVideoTile();
     }
