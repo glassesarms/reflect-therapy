@@ -9,6 +9,9 @@ import { Label } from '@/components/ui/label'
 export default function BookingPage() {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,7 +19,7 @@ export default function BookingPage() {
     await fetch('/api/bookings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date, time, notes })
+      body: JSON.stringify({ date, time, name, email, phone, notes })
     });
     alert('Booking requested');
   };
@@ -29,6 +32,33 @@ export default function BookingPage() {
         </CardHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone (optional)</Label>
+              <Input
+                id="phone"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
               <Input
