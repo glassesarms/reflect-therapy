@@ -1,6 +1,6 @@
 "use client";
-import { Suspense, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import {
   ConsoleLogger,
@@ -9,14 +9,19 @@ import {
   LogLevel,
   MeetingSessionConfiguration,
 } from "amazon-chime-sdk-js";
+import { Button } from "@/components/ui/button";
 
 function RoomContent() {
   const params = useSearchParams();
+  const router = useRouter();
   const meetingId = params.get("meetingId");
   const attendeeId = params.get("attendeeId");
   const token = params.get("token");
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const meetingSessionRef = useRef<DefaultMeetingSession>();
+  const [audioMuted, setAudioMuted] = useState(false);
+  const [videoOff, setVideoOff] = useState(false);
 
   useEffect(() => {
     if (!meetingId || !attendeeId || !token) return;
@@ -40,6 +45,7 @@ function RoomContent() {
         logger,
         deviceController
       );
+      meetingSessionRef.current = meetingSession;
 
       meetingSession.audioVideo.addObserver({
         videoTileDidUpdate: (tile) => {
@@ -66,15 +72,49 @@ function RoomContent() {
 
   if (!meetingId || !attendeeId || !token) return <p className="p-4">Missing parameters</p>;
 
+  const toggleAudio = () => {
+    const session = meetingSessionRef.current;
+    if (!session) return;
+    if (audioMuted) {
+      session.audioVideo.realtimeUnmuteLocalAudio();
+    } else {
+      session.audioVideo.realtimeMuteLocalAudio();
+    }
+    setAudioMuted(!audioMuted);
+  };
+
+  const toggleVideo = () => {
+    const session = meetingSessionRef.current;
+    if (!session) return;
+    if (videoOff) {
+      session.audioVideo.startLocalVideoTile();
+    } else {
+      session.audioVideo.stopLocalVideoTile();
+    }
+    setVideoOff(!videoOff);
+  };
+
+  const hangUp = () => {
+    meetingSessionRef.current?.audioVideo.stop();
+    router.push("/");
+  };
+
   return (
     <main className="container mx-auto p-4 space-y-4">
-      <div className="relative w-full h-[80vh]">
-        <video ref={remoteVideoRef} className="w-full h-full bg-black" autoPlay />
-        <video
-          ref={localVideoRef}
-          className="absolute bottom-4 right-4 w-40 h-32 bg-black"
-          autoPlay
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 h-[80vh] rounded-lg overflow-hidden bg-black">
+        <video ref={remoteVideoRef} className="w-full h-full object-contain bg-black" autoPlay />
+        <video ref={localVideoRef} className="w-full h-full object-contain bg-black" autoPlay muted />
+      </div>
+      <div className="flex justify-center gap-4">
+        <Button variant="secondary" onClick={toggleAudio}>
+          {audioMuted ? "Unmute" : "Mute"}
+        </Button>
+        <Button variant="secondary" onClick={toggleVideo}>
+          {videoOff ? "Start Video" : "Stop Video"}
+        </Button>
+        <Button variant="destructive" onClick={hangUp}>
+          Hang Up
+        </Button>
       </div>
     </main>
   );
