@@ -1,6 +1,6 @@
 # Reflect Therapy
 
-This is a template Next.js site for online therapy sessions. It includes a simple booking form, admin page to manage bookings, cancel appointments, block out times, and Twilio integration for video calls. Deploy using [SST](https://sst.dev) to AWS.
+This is a template Next.js site for online therapy sessions. It includes a simple booking form, admin page to manage bookings, cancel appointments, block out times, and Amazon Chime integration for video calls. Deploy using [SST](https://sst.dev) to AWS.
 
 ## Setup
 
@@ -28,10 +28,8 @@ Add the required values to `.env`:
 
 ```dotenv
 ADMIN_PASSWORD=your_admin_password
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_API_KEY=your_api_key_sid
-TWILIO_API_SECRET=your_api_key_secret
+EMAIL_FROM=verified_email@example.com
+AWS_REGION=us-east-1
 BOOKINGS_TABLE_NAME=name_of_dynamodb_table
 BLOCKOUTS_TABLE_NAME=name_of_blockouts_table
 ```

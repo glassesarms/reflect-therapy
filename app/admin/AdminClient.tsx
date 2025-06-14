@@ -24,7 +24,21 @@ export default function AdminClient() {
       alert(error || 'Failed to create room');
       return;
     }
-    router.push(`/room?url=${encodeURIComponent(url)}`);
+    router.push(url);
+  };
+
+  const sendLink = async (id: string) => {
+    const res = await fetch('/api/send-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const { error } = await res.json();
+      alert(error || 'Failed to send link');
+    } else {
+      alert('Link sent');
+    }
   };
 
   const cancelBooking = async (id: string) => {
@@ -87,12 +101,17 @@ export default function AdminClient() {
                       Create Room
                     </Button>
                   ) : (
-                    <Button
-                      size="sm"
-                      onClick={() => router.push(`/room?url=${encodeURIComponent(b.roomUrl)}`)}
-                    >
-                      Open Room
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => router.push(b.roomUrl)}
+                      >
+                        Open Room
+                      </Button>
+                      <Button size="sm" onClick={() => sendLink(b.id)}>
+                        Send Link
+                      </Button>
+                    </>
                   )}
                   <Button size="sm" variant="destructive" onClick={() => cancelBooking(b.id)}>
                     Cancel
