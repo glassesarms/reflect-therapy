@@ -7,7 +7,10 @@ import type { FormEvent } from 'react'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export default function AdminClient() {
+interface Props {
+  past?: boolean;
+}
+export default function AdminClient({ past = false }: Props) {
   const router = useRouter();
   const { data, mutate } = useSWR('/api/bookings', fetcher);
   const { data: blocks, mutate: mutateBlocks } = useSWR('/api/blockouts', fetcher);
@@ -70,52 +73,82 @@ export default function AdminClient() {
 
   if (!data || !blocks) return <p>Loading...</p>
 
+  const bookings = data
+    .filter((b: any) => {
+      const ts = new Date(`${b.date}T${b.time}:00Z`).getTime();
+      return past ? ts < Date.now() : ts >= Date.now();
+    })
+    .sort((a: any, b: any) => {
+      const ta = new Date(`${a.date}T${a.time}:00Z`).getTime();
+      const tb = new Date(`${b.date}T${b.time}:00Z`).getTime();
+      return past ? tb - ta : ta - tb;
+    });
+
   return (
     <main className="container mx-auto p-4">
+      <div className="mb-4 flex gap-4 border-b">
+        <button
+          className={`px-4 py-2 -mb-px border-b-2 ${
+            past ? 'border-transparent' : 'border-primary'
+          }`}
+          onClick={() => router.push('/admin')}
+        >
+          Upcoming
+        </button>
+        <button
+          className={`px-4 py-2 -mb-px border-b-2 ${
+            past ? 'border-primary' : 'border-transparent'
+          }`}
+          onClick={() => router.push('/admin/history')}
+        >
+          Past
+        </button>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Bookings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {data.map((b: any) => (
+          {bookings.map((b: any) => (
             <Card key={b.id} className="border p-4 space-y-2">
               <div className="font-medium">
                 {b.date} {b.time}
               </div>
               <div className="text-sm text-muted-foreground">{b.notes}</div>
-              {b.status === 'cancelled' ? (
+              {b.status === 'cancelled' && !past ? (
                 <div className="text-sm text-red-500">Cancelled</div>
               ) : (
                 <div className="flex gap-2">
-                  {!b.adminUrl ? (
-                    <Button
-                      size="sm"
-                      onClick={() => createRoom(b.id)}
-                      variant={
-                        new Date(`${b.date}T${b.time}:00Z`).getTime() - Date.now() >
-                          15 * 60 * 1000
-                          ? 'secondary'
-                          : 'default'
-                      }
-                    >
-                      Create Room
-                    </Button>
-                  ) : (
+                  {!past && (
                     <>
-                      <Button
-                        size="sm"
-                        onClick={() => router.push(b.adminUrl)}
-                      >
-                        Open Room
-                      </Button>
-                      <Button size="sm" onClick={() => sendLink(b.id)}>
-                        Send Link
+                      {!b.adminUrl ? (
+                        <Button
+                          size="sm"
+                          onClick={() => createRoom(b.id)}
+                          variant={
+                            new Date(`${b.date}T${b.time}:00Z`).getTime() - Date.now() >
+                              15 * 60 * 1000
+                              ? 'secondary'
+                              : 'default'
+                          }
+                        >
+                          Create Room
+                        </Button>
+                      ) : (
+                        <>
+                          <Button size="sm" onClick={() => router.push(b.adminUrl)}>
+                            Open Room
+                          </Button>
+                          <Button size="sm" onClick={() => sendLink(b.id)}>
+                            Send Link
+                          </Button>
+                        </>
+                      )}
+                      <Button size="sm" variant="destructive" onClick={() => cancelBooking(b.id)}>
+                        Cancel
                       </Button>
                     </>
                   )}
-                  <Button size="sm" variant="destructive" onClick={() => cancelBooking(b.id)}>
-                    Cancel
-                  </Button>
                   {b.transcript && (
                     <Button size="sm" onClick={() => router.push(`/admin/transcripts/${b.id}`)}>
                       Transcript
