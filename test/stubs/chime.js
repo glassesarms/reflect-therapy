@@ -4,7 +4,9 @@ class ChimeSDKMeetingsClient {
       return { Meeting: { MeetingId: 'MID' } };
     }
     if (cmd.constructor.name === 'CreateAttendeeCommand') {
-      return { Attendee: { AttendeeId: 'AID', JoinToken: 'TOKEN' } };
+      if (!this.count) this.count = 0;
+      this.count += 1;
+      return { Attendee: { AttendeeId: `AID${this.count}`, JoinToken: `TOKEN${this.count}` } };
     }
     if (cmd.constructor.name === 'GetMeetingCommand') {
       return {

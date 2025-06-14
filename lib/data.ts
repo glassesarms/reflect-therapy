@@ -16,7 +16,8 @@ export interface Booking {
   email: string;
   phone?: string;
   notes: string;
-  roomUrl?: string;
+  adminUrl?: string;
+  clientUrl?: string;
   status?: 'booked' | 'cancelled';
 }
 
@@ -61,18 +62,25 @@ export async function getBooking(id: string): Promise<Booking | undefined> {
   return res.Item as Booking | undefined;
 }
 
-export async function setRoomUrl(id: string, roomUrl: string): Promise<void> {
+export async function setRoomUrls(
+  id: string,
+  adminUrl: string,
+  clientUrl: string
+): Promise<void> {
   if (useBookingMemory) {
     const booking = bookings.find((b) => b.id === id);
-    if (booking) booking.roomUrl = roomUrl;
+    if (booking) {
+      booking.adminUrl = adminUrl;
+      booking.clientUrl = clientUrl;
+    }
     return;
   }
   await client!.send(
     new UpdateCommand({
       TableName: BOOKING_TABLE,
       Key: { id },
-      UpdateExpression: 'SET roomUrl = :url',
-      ExpressionAttributeValues: { ':url': roomUrl },
+      UpdateExpression: 'SET adminUrl = :a, clientUrl = :c',
+      ExpressionAttributeValues: { ':a': adminUrl, ':c': clientUrl },
     })
   );
 }

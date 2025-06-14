@@ -9,7 +9,7 @@ const sns = new SNSClient({});
 export async function POST(req: NextRequest) {
   const { id } = await req.json();
   const booking = await getBooking(id);
-  if (!booking || !booking.roomUrl) {
+  if (!booking || !booking.clientUrl) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
   try {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
         new SendEmailCommand({
           Destination: { ToAddresses: [booking.email] },
           Message: {
-            Body: { Text: { Data: `Join your session at ${baseUrl}${booking.roomUrl}` } },
+            Body: { Text: { Data: `Join your session at ${baseUrl}${booking.clientUrl}` } },
             Subject: { Data: 'Your session link' },
           },
           Source: process.env.EMAIL_FROM!,
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       await sns.send(
         new PublishCommand({
           PhoneNumber: booking.phone,
-          Message: `Join your session at ${baseUrl}${booking.roomUrl}`,
+          Message: `Join your session at ${baseUrl}${booking.clientUrl}`,
         })
       );
     }

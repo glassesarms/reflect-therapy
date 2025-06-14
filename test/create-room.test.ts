@@ -15,8 +15,12 @@ describe('create-room API', () => {
     const res: any = await POST(req);
     assert.equal(res.status, 200);
     assert.equal(
-      res.data.url,
-      '/room?meetingId=MID&attendeeId=AID&token=TOKEN'
+      res.data.adminUrl,
+      '/room?meetingId=MID&attendeeId=AID1&token=TOKEN1'
+    );
+    assert.equal(
+      res.data.clientUrl,
+      '/room?meetingId=MID&attendeeId=AID2&token=TOKEN2'
     );
   });
 
@@ -32,17 +36,22 @@ describe('create-room API', () => {
     const res: any = await POST(req);
     assert.equal(res.status, 200);
     assert.equal(
-      res.data.url,
-      '/room?meetingId=MID&attendeeId=AID&token=TOKEN'
+      res.data.adminUrl,
+      '/room?meetingId=MID&attendeeId=AID1&token=TOKEN1'
+    );
+    assert.equal(
+      res.data.clientUrl,
+      '/room?meetingId=MID&attendeeId=AID2&token=TOKEN2'
     );
   });
 
   it('returns existing room url', async () => {
     const now = new Date();
-    bookings.push({ id: '3', date: now.toISOString().slice(0,10), time: now.toISOString().slice(11,16), name: 'C', email: 'c', notes: 'n', roomUrl: 'foo' });
+    bookings.push({ id: '3', date: now.toISOString().slice(0,10), time: now.toISOString().slice(11,16), name: 'C', email: 'c', notes: 'n', adminUrl: 'foo', clientUrl: 'bar' });
     const req = new NextRequest('http://test', { body: JSON.stringify({ id: '3' }) });
     const res: any = await POST(req);
     assert.equal(res.status, 200);
-    assert.equal(res.data.url, 'foo');
+    assert.equal(res.data.adminUrl, 'foo');
+    assert.equal(res.data.clientUrl, 'bar');
   });
 });
