@@ -228,7 +228,7 @@ function RoomContent() {
           <>
             {loading && <p className="text-center text-gray-600">Connecting to meeting...</p>}
             <div className="flex flex-col sm:flex-row gap-4 h-[75vh]">
-              <div className="w-full sm:w-1/3 max-h-64 sm:max-h-full rounded-2xl overflow-y-auto bg-neutral-900 shadow-lg p-2 text-sm whitespace-pre-wrap">
+              <div className="w-full sm:w-1/3 max-h-64 sm:max-h-full rounded-2xl overflow-y-auto bg-neutral-100 shadow-lg p-2 text-sm whitespace-pre-wrap">
                 {transcript
                   ? transcript
                   : transcriptionStarted
