@@ -27,8 +27,12 @@ export function MyStack({ stack }: StackContext) {
     },
   });
 
-  // Allow the site to create Amazon Chime meetings
-  site.attachPermissions(["chime:*"]);
+  // Allow the site to create Amazon Chime meetings and send emails/SMS
+  site.attachPermissions([
+    "chime:*",
+    "ses:SendEmail",
+    "sns:Publish",
+  ]);
 
   stack.addOutputs({
     SiteUrl: site.url,
