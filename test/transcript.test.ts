@@ -26,9 +26,10 @@ describe('transcript API', () => {
     assert.equal(res.data.transcript, 'hello world');
   });
 
-  it('returns 404 for missing transcript', async () => {
+  it('returns empty transcript when none set', async () => {
     const res: any = await GET(new NextRequest('http://test'), { params: { id: 'x' } });
-    assert.equal(res.status, 404);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.transcript, '');
   });
 
   it('starts meeting transcription', async () => {

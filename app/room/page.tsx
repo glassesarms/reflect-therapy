@@ -39,6 +39,7 @@ function RoomContent() {
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const audioElementRef = useRef<HTMLAudioElement>(null);
   const meetingSessionRef = useRef<DefaultMeetingSession>();
+  const transcriptHandlerRef = useRef<(e: any) => void>();
   const previewDeviceController = useRef<DefaultDeviceController>();
 
   const [hasJoined, setHasJoined] = useState(false);
@@ -120,6 +121,34 @@ function RoomContent() {
       } as AudioVideoObserver);
 
       meetingSession.audioVideo.start();
+
+      const transcriptHandler = (event: any) => {
+        if ('results' in event) {
+          const parts: string[] = [];
+          for (const result of event.results) {
+            if (!result.isPartial) {
+              const text = result.alternatives?.[0]?.transcript;
+              if (text) parts.push(text);
+            }
+          }
+          if (parts.length) {
+            const chunk = parts.join(' ') + '\n';
+            setTranscript((t) => t + chunk);
+            if (bookingId) {
+              fetch(`/api/bookings/${bookingId}/transcript`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transcript: chunk, append: true }),
+              }).catch(() => {});
+            }
+          }
+        }
+      };
+      transcriptHandlerRef.current = transcriptHandler;
+      meetingSession.audioVideo.transcriptionController?.subscribeToTranscriptEvent(
+        transcriptHandler
+      );
+
       meetingSession.audioVideo.startLocalVideoTile();
       if (bookingId && role === 'admin') {
         await startTranscription();
@@ -164,7 +193,15 @@ function RoomContent() {
   };
 
   const hangUp = () => {
-    meetingSessionRef.current?.audioVideo.stop();
+    const session = meetingSessionRef.current;
+    if (session) {
+      if (transcriptHandlerRef.current) {
+        session.audioVideo.transcriptionController?.unsubscribeFromTranscriptEvent(
+          transcriptHandlerRef.current
+        );
+      }
+      session.audioVideo.stop();
+    }
     router.push("/");
   };
 
@@ -228,7 +265,7 @@ function RoomContent() {
           <>
             {loading && <p className="text-center text-gray-600">Connecting to meeting...</p>}
             <div className="flex flex-col sm:flex-row gap-4 h-[75vh]">
-              <div className="w-full sm:w-1/3 max-h-64 sm:max-h-full rounded-2xl overflow-y-auto bg-neutral-900 shadow-lg p-2 text-sm whitespace-pre-wrap">
+              <div className="w-full sm:w-1/3 max-h-64 sm:max-h-full rounded-2xl overflow-y-auto bg-neutral-100 shadow-lg p-2 text-sm whitespace-pre-wrap">
                 {transcript
                   ? transcript
                   : transcriptionStarted
