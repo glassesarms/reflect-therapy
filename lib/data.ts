@@ -37,7 +37,7 @@ const useMemory = !TABLE || process.env.NODE_ENV === 'test';
 const blockoutMemory = !BLOCKOUT_TABLE || process.env.NODE_ENV === 'test';
 
 let client: DynamoDBDocumentClient | undefined;
-if (!useMemory) {
+if (!useMemory || !blockoutMemory) {
   client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 }
 
