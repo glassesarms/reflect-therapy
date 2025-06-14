@@ -2,7 +2,7 @@ import { StackContext, NextjsSite, Table } from 'sst/constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 
 export function MyStack({ stack }: StackContext) {
-  const table = new Table(stack, 'Bookings', {
+  const bookings = new Table(stack, 'Bookings', {
     fields: {
       id: 'string',
     },
@@ -18,10 +18,11 @@ export function MyStack({ stack }: StackContext) {
 
   const site = new NextjsSite(stack, 'Site', {
     path: '.',
-    bind: [table, blockouts],
+    bind: [bookings, blockouts],
     environment: {
       ADMIN_PASSWORD: process.env.ADMIN_PASSWORD!,
       BLOCKOUTS_TABLE_NAME: blockouts.tableName,
+      BOOKINGS_TABLE_NAME: bookings.tableName,
       EMAIL_FROM: process.env.EMAIL_FROM!,
     },
   });
