@@ -16,12 +16,13 @@ describe('create-room API', () => {
     assert.equal(res.status, 200);
     assert.equal(
       res.data.adminUrl,
-      '/room?meetingId=MID&attendeeId=AID1&token=TOKEN1'
+      '/room?meetingId=MID&attendeeId=AID1&token=TOKEN1&bookingId=1&role=admin'
     );
     assert.equal(
       res.data.clientUrl,
-      '/room?meetingId=MID&attendeeId=AID2&token=TOKEN2'
+      '/room?meetingId=MID&attendeeId=AID2&token=TOKEN2&bookingId=1&role=client'
     );
+    assert.equal(bookings[0].meetingId, 'MID');
   });
 
   it('returns 404 for missing booking', async () => {
@@ -37,12 +38,13 @@ describe('create-room API', () => {
     assert.equal(res.status, 200);
     assert.equal(
       res.data.adminUrl,
-      '/room?meetingId=MID&attendeeId=AID1&token=TOKEN1'
+      '/room?meetingId=MID&attendeeId=AID1&token=TOKEN1&bookingId=2&role=admin'
     );
     assert.equal(
       res.data.clientUrl,
-      '/room?meetingId=MID&attendeeId=AID2&token=TOKEN2'
+      '/room?meetingId=MID&attendeeId=AID2&token=TOKEN2&bookingId=2&role=client'
     );
+    assert.equal(bookings[0].meetingId, 'MID');
   });
 
   it('returns existing room url', async () => {

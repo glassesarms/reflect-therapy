@@ -43,15 +43,15 @@ export async function POST(req: NextRequest) {
       meetingRes.Meeting!.MeetingId!
     )}&attendeeId=${encodeURIComponent(adminRes.Attendee!.AttendeeId!)}&token=${encodeURIComponent(
       adminRes.Attendee!.JoinToken!
-    )}`;
+    )}&bookingId=${encodeURIComponent(id)}&role=admin`;
 
     const clientUrl = `/room?meetingId=${encodeURIComponent(
       meetingRes.Meeting!.MeetingId!
     )}&attendeeId=${encodeURIComponent(clientRes.Attendee!.AttendeeId!)}&token=${encodeURIComponent(
       clientRes.Attendee!.JoinToken!
-    )}`;
+    )}&bookingId=${encodeURIComponent(id)}&role=client`;
 
-    await setRoomUrls(id, adminUrl, clientUrl);
+    await setRoomUrls(id, adminUrl, clientUrl, meetingRes.Meeting!.MeetingId!);
     return NextResponse.json({ adminUrl, clientUrl });
   } catch (err: any) {
     console.error('Chime create meeting failed', err);

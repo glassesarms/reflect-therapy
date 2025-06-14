@@ -18,7 +18,9 @@ export interface Booking {
   notes: string;
   adminUrl?: string;
   clientUrl?: string;
+  meetingId?: string;
   status?: 'booked' | 'cancelled';
+  transcript?: string;
 }
 
 export interface Blockout {
@@ -65,13 +67,15 @@ export async function getBooking(id: string): Promise<Booking | undefined> {
 export async function setRoomUrls(
   id: string,
   adminUrl: string,
-  clientUrl: string
+  clientUrl: string,
+  meetingId: string
 ): Promise<void> {
   if (useBookingMemory) {
     const booking = bookings.find((b) => b.id === id);
     if (booking) {
       booking.adminUrl = adminUrl;
       booking.clientUrl = clientUrl;
+      booking.meetingId = meetingId;
     }
     return;
   }
@@ -79,8 +83,8 @@ export async function setRoomUrls(
     new UpdateCommand({
       TableName: BOOKING_TABLE,
       Key: { id },
-      UpdateExpression: 'SET adminUrl = :a, clientUrl = :c',
-      ExpressionAttributeValues: { ':a': adminUrl, ':c': clientUrl },
+      UpdateExpression: 'SET adminUrl = :a, clientUrl = :c, meetingId = :m',
+      ExpressionAttributeValues: { ':a': adminUrl, ':c': clientUrl, ':m': meetingId },
     })
   );
 }
@@ -100,6 +104,38 @@ export async function cancelBooking(id: string): Promise<void> {
       ExpressionAttributeValues: { ':s': 'cancelled' },
     })
   );
+}
+
+export async function setTranscript(id: string, transcript: string): Promise<void> {
+  if (useBookingMemory) {
+    const booking = bookings.find((b) => b.id === id);
+    if (booking) booking.transcript = transcript;
+    return;
+  }
+  await client!.send(
+    new UpdateCommand({
+      TableName: BOOKING_TABLE,
+      Key: { id },
+      UpdateExpression: 'SET transcript = :t',
+      ExpressionAttributeValues: { ':t': transcript },
+    })
+  );
+}
+
+export async function appendTranscript(id: string, chunk: string): Promise<void> {
+  const current = (await getTranscript(id)) || '';
+  await setTranscript(id, current + chunk);
+}
+
+export async function getTranscript(id: string): Promise<string | undefined> {
+  if (useBookingMemory) {
+    const booking = bookings.find((b) => b.id === id);
+    return booking?.transcript;
+  }
+  const res = await client!.send(
+    new GetCommand({ TableName: BOOKING_TABLE, Key: { id }, ProjectionExpression: 'transcript' })
+  );
+  return (res.Item as any)?.transcript as string | undefined;
 }
 
 export async function listBlockouts(): Promise<Blockout[]> {

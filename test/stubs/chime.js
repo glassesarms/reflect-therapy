@@ -20,10 +20,15 @@ class ChimeSDKMeetingsClient {
         },
       };
     }
+    if (cmd.constructor.name === 'StartMeetingTranscriptionCommand') {
+      this.transcriptionStarted = true;
+      return {};
+    }
     return {};
   }
 }
 class CreateMeetingCommand { constructor() {} }
 class CreateAttendeeCommand { constructor() {} }
 class GetMeetingCommand { constructor() {} }
-module.exports = { ChimeSDKMeetingsClient, CreateMeetingCommand, CreateAttendeeCommand, GetMeetingCommand };
+class StartMeetingTranscriptionCommand { constructor() {} }
+module.exports = { ChimeSDKMeetingsClient, CreateMeetingCommand, CreateAttendeeCommand, GetMeetingCommand, StartMeetingTranscriptionCommand };
