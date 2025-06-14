@@ -28,7 +28,9 @@
     "@aws-sdk/client-chime-sdk-meetings": "^3.828.0",
     "@aws-sdk/client-ses": "^3.828.0",
     "@aws-sdk/client-sns": "^3.828.0",
-    "amazon-chime-sdk-js": "^3.27.1"
+    "amazon-chime-sdk-js": "^3.27.1",
+    "aws-cdk-lib": "^2.101.1",
+    "constructs": "^10.2.69"
   },
   "devDependencies": {
     "@types/mocha": "10.0.6",
