@@ -32,6 +32,8 @@ function RoomContent() {
   const meetingId = params.get("meetingId");
   const attendeeId = params.get("attendeeId");
   const token = params.get("token");
+  const bookingId = params.get("bookingId");
+  const role = params.get("role");
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -43,6 +45,7 @@ function RoomContent() {
   const [audioMuted, setAudioMuted] = useState(false);
   const [videoOff, setVideoOff] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [transcriptionStarted, setTranscriptionStarted] = useState(false);
 
   // Setup video preview before joining
   useEffect(() => {
@@ -117,6 +120,9 @@ function RoomContent() {
 
       meetingSession.audioVideo.start();
       meetingSession.audioVideo.startLocalVideoTile();
+      if (bookingId && role === 'admin') {
+        await startTranscription();
+      }
       setHasJoined(true);
       setLoading(false);
     } catch (err) {
@@ -159,6 +165,14 @@ function RoomContent() {
   const hangUp = () => {
     meetingSessionRef.current?.audioVideo.stop();
     router.push("/");
+  };
+
+  const startTranscription = async () => {
+    if (!bookingId) return;
+    const res = await fetch(`/api/bookings/${bookingId}/start-transcription`, {
+      method: 'POST',
+    });
+    if (res.ok) setTranscriptionStarted(true);
   };
 
   if (!meetingId || !attendeeId || !token)
@@ -242,6 +256,20 @@ function RoomContent() {
                 </TooltipTrigger>
                 <TooltipContent>Leave Meeting</TooltipContent>
               </Tooltip>
+              {role === 'admin' && (
+                transcriptionStarted ? (
+                  <span className="px-3 py-3 text-green-500">Transcribing...</span>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button className="px-6 py-3 rounded-xl flex items-center gap-2" variant="secondary" onClick={startTranscription}>
+                        Start Transcription
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Begin transcribing</TooltipContent>
+                  </Tooltip>
+                )
+              )}
             </div>
           </>
         )}

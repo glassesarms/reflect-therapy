@@ -116,6 +116,11 @@ export default function AdminClient() {
                   <Button size="sm" variant="destructive" onClick={() => cancelBooking(b.id)}>
                     Cancel
                   </Button>
+                  {b.transcript && (
+                    <Button size="sm" onClick={() => router.push(`/admin/transcripts/${b.id}`)}>
+                      Transcript
+                    </Button>
+                  )}
                 </div>
               )}
             </Card>
