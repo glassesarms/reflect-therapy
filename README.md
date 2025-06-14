@@ -61,6 +61,27 @@ pnpm run sst
 pnpm test
 ```
 
+## Adding UI components
+
+This project uses [shadcn/ui](https://ui.shadcn.com) for reusable UI
+components. To add more components run the new `shadcn` CLI from the
+project root:
+
+```bash
+npx shadcn add <component>
+```
+
+The CLI will copy the selected component files into `components/ui/` and
+install any required dependencies. If you have not initialized shadcn in
+your project yet, run the init command first:
+
+```bash
+npx shadcn init
+```
+
+The older `shadcn-ui` package is deprecated, so always use the `shadcn`
+CLI going forward.
+
 ## GitHub Actions
 
 A basic workflow is provided in `.github/workflows/deploy.yml` to deploy to AWS on push to `main`.

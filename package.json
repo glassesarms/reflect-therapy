@@ -10,12 +10,22 @@
     "test": "c8 mocha -r ts-node/register -r ./test/setup.js \"test/**/*.test.ts\" --reporter spec"
   },
   "dependencies": {
+    "@aws-sdk/client-chime-sdk-meetings": "^3.828.0",
+    "@aws-sdk/client-dynamodb": "^3.521.0",
+    "@aws-sdk/client-ses": "^3.828.0",
+    "@aws-sdk/client-sns": "^3.828.0",
+    "@aws-sdk/lib-dynamodb": "^3.521.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tooltip": "^1.2.7",
     "@types/node": "20.5.0",
     "@types/react": "18.2.0",
+    "amazon-chime-sdk-js": "^3.27.1",
+    "aws-cdk-lib": "^2.101.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "constructs": "^10.2.69",
+    "lucide-react": "^0.515.0",
     "next": "14.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -23,14 +33,7 @@
     "swr": "2.2.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "3.3.5",
-    "@aws-sdk/client-dynamodb": "^3.521.0",
-    "@aws-sdk/lib-dynamodb": "^3.521.0",
-    "@aws-sdk/client-chime-sdk-meetings": "^3.828.0",
-    "@aws-sdk/client-ses": "^3.828.0",
-    "@aws-sdk/client-sns": "^3.828.0",
-    "amazon-chime-sdk-js": "^3.27.1",
-    "aws-cdk-lib": "^2.101.1",
-    "constructs": "^10.2.69"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/mocha": "10.0.6",
