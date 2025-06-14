@@ -18,13 +18,13 @@ export default function AdminClient() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
     });
-    const { url, error } = await res.json();
+    const { adminUrl, error } = await res.json();
     mutate();
-    if (!res.ok || !url) {
+    if (!res.ok || !adminUrl) {
       alert(error || 'Failed to create room');
       return;
     }
-    router.push(url);
+    router.push(adminUrl);
   };
 
   const sendLink = async (id: string) => {
@@ -87,13 +87,13 @@ export default function AdminClient() {
                 <div className="text-sm text-red-500">Cancelled</div>
               ) : (
                 <div className="flex gap-2">
-                  {!b.roomUrl ? (
+                  {!b.adminUrl ? (
                     <Button
                       size="sm"
                       onClick={() => createRoom(b.id)}
                       variant={
                         new Date(`${b.date}T${b.time}:00Z`).getTime() - Date.now() >
-                        15 * 60 * 1000
+                          15 * 60 * 1000
                           ? 'secondary'
                           : 'default'
                       }
@@ -104,7 +104,7 @@ export default function AdminClient() {
                     <>
                       <Button
                         size="sm"
-                        onClick={() => router.push(b.roomUrl)}
+                        onClick={() => router.push(b.adminUrl)}
                       >
                         Open Room
                       </Button>

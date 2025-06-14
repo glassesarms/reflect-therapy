@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBooking, setRoomUrl } from '../../../lib/data';
+import { getBooking, setRoomUrls } from '../../../lib/data';
 import {
   ChimeSDKMeetingsClient,
   CreateMeetingCommand,
@@ -11,8 +11,8 @@ export async function POST(req: NextRequest) {
   const booking = await getBooking(id);
   if (!booking) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  if (booking.roomUrl) {
-    return NextResponse.json({ url: booking.roomUrl });
+  if (booking.adminUrl && booking.clientUrl) {
+    return NextResponse.json({ adminUrl: booking.adminUrl, clientUrl: booking.clientUrl });
   }
 
   const client = new ChimeSDKMeetingsClient({});
@@ -25,20 +25,34 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    const attendeeRes = await client.send(
+    const adminRes = await client.send(
       new CreateAttendeeCommand({
         MeetingId: meetingRes.Meeting!.MeetingId!,
         ExternalUserId: `admin-${id}`,
       })
     );
 
-    const joinUrl = `/room?meetingId=${encodeURIComponent(
+    const clientRes = await client.send(
+      new CreateAttendeeCommand({
+        MeetingId: meetingRes.Meeting!.MeetingId!,
+        ExternalUserId: `client-${id}`,
+      })
+    );
+
+    const adminUrl = `/room?meetingId=${encodeURIComponent(
       meetingRes.Meeting!.MeetingId!
-    )}&attendeeId=${encodeURIComponent(attendeeRes.Attendee!.AttendeeId!)}&token=${encodeURIComponent(
-      attendeeRes.Attendee!.JoinToken!
+    )}&attendeeId=${encodeURIComponent(adminRes.Attendee!.AttendeeId!)}&token=${encodeURIComponent(
+      adminRes.Attendee!.JoinToken!
     )}`;
-    await setRoomUrl(id, joinUrl);
-    return NextResponse.json({ url: joinUrl });
+
+    const clientUrl = `/room?meetingId=${encodeURIComponent(
+      meetingRes.Meeting!.MeetingId!
+    )}&attendeeId=${encodeURIComponent(clientRes.Attendee!.AttendeeId!)}&token=${encodeURIComponent(
+      clientRes.Attendee!.JoinToken!
+    )}`;
+
+    await setRoomUrls(id, adminUrl, clientUrl);
+    return NextResponse.json({ adminUrl, clientUrl });
   } catch (err: any) {
     console.error('Chime create meeting failed', err);
     const message = err && typeof err === 'object' && 'message' in err ? err.message : 'Failed to create meeting';

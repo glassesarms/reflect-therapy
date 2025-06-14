@@ -68,9 +68,13 @@ function RoomContent() {
 
   return (
     <main className="container mx-auto p-4 space-y-4">
-      <div className="flex gap-4 w-full h-[80vh]">
-        <video ref={localVideoRef} className="flex-1 bg-black" autoPlay />
-        <video ref={remoteVideoRef} className="flex-1 bg-black" autoPlay />
+      <div className="relative w-full h-[80vh]">
+        <video ref={remoteVideoRef} className="w-full h-full bg-black" autoPlay />
+        <video
+          ref={localVideoRef}
+          className="absolute bottom-4 right-4 w-40 h-32 bg-black"
+          autoPlay
+        />
       </div>
     </main>
   );
