@@ -17,6 +17,7 @@ import {
   Video,
   VideoOff,
   PhoneOff,
+  LogIn,
 } from "lucide-react";
 import {
   Tooltip,
@@ -36,86 +37,102 @@ function RoomContent() {
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const audioElementRef = useRef<HTMLAudioElement>(null);
   const meetingSessionRef = useRef<DefaultMeetingSession>();
+  const previewDeviceController = useRef<DefaultDeviceController>();
 
+  const [hasJoined, setHasJoined] = useState(false);
   const [audioMuted, setAudioMuted] = useState(false);
   const [videoOff, setVideoOff] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Setup video preview before joining
   useEffect(() => {
-    if (!meetingId || !attendeeId || !token) return;
+    async function setupPreview() {
+      const deviceController = new DefaultDeviceController(new ConsoleLogger("Preview", LogLevel.ERROR));
+      previewDeviceController.current = deviceController;
 
-    let meetingSession: DefaultMeetingSession | undefined;
-
-    async function startMeeting() {
-      try {
-        const res = await fetch(`/api/meetings/${meetingId}`);
-        const data = await res.json();
-        if (!res.ok || !data.meeting) {
-          console.error(data.error || "Failed to fetch meeting");
-          return;
-        }
-
-        const logger = new ConsoleLogger("Chime", LogLevel.WARN);
-        const deviceController = new DefaultDeviceController(logger);
-        meetingSession = new DefaultMeetingSession(
-          new MeetingSessionConfiguration(
-            { Meeting: data.meeting } as any,
-            { Attendee: { AttendeeId: attendeeId, JoinToken: token } } as any
-          ),
-          logger,
-          deviceController
-        );
-        meetingSessionRef.current = meetingSession;
-
-        // AUDIO IN
-        const audioInputs = await meetingSession.audioVideo.listAudioInputDevices();
-        if (audioInputs[0]) {
-          await meetingSession.audioVideo.startAudioInput(audioInputs[0].deviceId);
-        }
-
-        // VIDEO IN
-        const videoInputs = await meetingSession.audioVideo.listVideoInputDevices();
-        if (videoInputs[0]) {
-          await meetingSession.audioVideo.startVideoInput(videoInputs[0].deviceId);
-        }
-
-        // AUDIO OUT
-        if (audioElementRef.current) {
-          meetingSession.audioVideo.bindAudioElement(audioElementRef.current);
-        }
-
-        // Bind video tiles
-        meetingSession.audioVideo.addObserver({
-          videoTileDidUpdate: (tile) => {
-            const el = tile.localTile ? localVideoRef.current : remoteVideoRef.current;
-            if (el && tile.tileId != null) {
-              meetingSession?.audioVideo.bindVideoElement(tile.tileId, el);
-            }
-          },
-        } as AudioVideoObserver);
-
-        meetingSession.audioVideo.start();
-        meetingSession.audioVideo.startLocalVideoTile();
-        setLoading(false);
-      } catch (err) {
-        console.error("Meeting setup error:", err);
+      const videoDevices = await deviceController.listVideoInputDevices();
+      if (videoDevices[0]) {
+        await deviceController.startVideoInput(videoDevices[0].deviceId);
+        await deviceController.startVideoPreviewForVideoInput(localVideoRef.current!);
       }
     }
 
-    startMeeting();
+    setupPreview();
     return () => {
-      meetingSession?.audioVideo.stop();
+      const controller = previewDeviceController.current;
+      if (controller && localVideoRef.current) {
+        controller.stopVideoPreviewForVideoInput(localVideoRef.current);
+        controller.stopVideoInput();
+      }
     };
-  }, [meetingId, attendeeId, token]);
+  }, []);
+
+  // Full meeting setup after clicking "Join"
+  const joinMeeting = async () => {
+    if (!meetingId || !attendeeId || !token) return;
+    setLoading(true);
+
+    try {
+      const res = await fetch(`/api/meetings/${meetingId}`);
+      const data = await res.json();
+      if (!res.ok || !data.meeting) {
+        console.error(data.error || "Failed to fetch meeting");
+        return;
+      }
+
+      const logger = new ConsoleLogger("Chime", LogLevel.WARN);
+      const deviceController = new DefaultDeviceController(logger);
+      const meetingSession = new DefaultMeetingSession(
+        new MeetingSessionConfiguration(
+          { Meeting: data.meeting } as any,
+          { Attendee: { AttendeeId: attendeeId, JoinToken: token } } as any
+        ),
+        logger,
+        deviceController
+      );
+      meetingSessionRef.current = meetingSession;
+
+      const audioInputs = await meetingSession.audioVideo.listAudioInputDevices();
+      if (audioInputs[0]) {
+        await meetingSession.audioVideo.startAudioInput(audioInputs[0].deviceId);
+      }
+
+      const videoInputs = await meetingSession.audioVideo.listVideoInputDevices();
+      if (videoInputs[0]) {
+        await meetingSession.audioVideo.startVideoInput(videoInputs[0].deviceId);
+      }
+
+      if (audioElementRef.current) {
+        meetingSession.audioVideo.bindAudioElement(audioElementRef.current);
+      }
+
+      meetingSession.audioVideo.addObserver({
+        videoTileDidUpdate: (tile) => {
+          const el = tile.localTile ? localVideoRef.current : remoteVideoRef.current;
+          if (el && tile.tileId != null) {
+            meetingSession?.audioVideo.bindVideoElement(tile.tileId, el);
+          }
+        },
+      } as AudioVideoObserver);
+
+      meetingSession.audioVideo.start();
+      meetingSession.audioVideo.startLocalVideoTile();
+      setHasJoined(true);
+      setLoading(false);
+    } catch (err) {
+      console.error("Join error:", err);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!hasJoined) return;
       if (e.key.toLowerCase() === "m") toggleAudio();
       if (e.key.toLowerCase() === "v") toggleVideo();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [audioMuted, videoOff]);
+  }, [hasJoined, audioMuted, videoOff]);
 
   const toggleAudio = () => {
     const session = meetingSessionRef.current;
@@ -150,60 +167,84 @@ function RoomContent() {
   return (
     <TooltipProvider>
       <main className="container mx-auto p-4 space-y-6">
-        {loading && <p className="text-center text-gray-600">Connecting to meeting...</p>}
         <audio ref={audioElementRef} hidden />
 
-        <div className="flex flex-col sm:flex-row gap-4 h-[75vh]">
-          <div className="flex-1 rounded-2xl overflow-hidden bg-neutral-900 shadow-lg">
-            <video
-              ref={remoteVideoRef}
-              className="w-full h-full object-cover bg-neutral-900"
-              autoPlay
-              playsInline
-            />
-          </div>
-          <div className="w-full sm:w-1/3 max-h-64 sm:max-h-full rounded-2xl overflow-hidden bg-neutral-800 shadow-lg border border-gray-700">
-            <video
-              ref={localVideoRef}
-              className="w-full h-full object-cover bg-neutral-800 opacity-90"
-              autoPlay
-              muted
-              playsInline
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-center gap-4 mt-4">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button className="px-6 py-3 rounded-xl flex items-center gap-2" variant="secondary" onClick={toggleAudio}>
-                {audioMuted ? <MicOff className="w-5 h-5 text-red-500" /> : <Mic className="w-5 h-5 text-green-500" />}
-                {audioMuted ? "Unmute" : "Mute"}
+        {!hasJoined ? (
+          <>
+            <h1 className="text-center text-xl font-medium text-gray-800 dark:text-gray-200">
+              Preview your camera before joining
+            </h1>
+            <div className="max-w-lg mx-auto rounded-2xl overflow-hidden shadow-lg bg-neutral-900 h-[60vh]">
+              <video
+                ref={localVideoRef}
+                className="w-full h-full object-cover opacity-90"
+                autoPlay
+                muted
+                playsInline
+              />
+            </div>
+            <div className="flex justify-center mt-4">
+              <Button onClick={joinMeeting} className="flex gap-2 items-center px-6 py-3">
+                <LogIn className="w-5 h-5" />
+                Join Meeting
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>Shortcut: M</TooltipContent>
-          </Tooltip>
+            </div>
+          </>
+        ) : (
+          <>
+            {loading && <p className="text-center text-gray-600">Connecting to meeting...</p>}
+            <div className="flex flex-col sm:flex-row gap-4 h-[75vh]">
+              <div className="flex-1 rounded-2xl overflow-hidden bg-neutral-900 shadow-lg">
+                <video
+                  ref={remoteVideoRef}
+                  className="w-full h-full object-cover bg-neutral-900"
+                  autoPlay
+                  playsInline
+                />
+              </div>
+              <div className="w-full sm:w-1/3 max-h-64 sm:max-h-full rounded-2xl overflow-hidden bg-neutral-800 shadow-lg border border-gray-700">
+                <video
+                  ref={localVideoRef}
+                  className="w-full h-full object-cover bg-neutral-800 opacity-90"
+                  autoPlay
+                  muted
+                  playsInline
+                />
+              </div>
+            </div>
+            <div className="flex justify-center gap-4 mt-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="px-6 py-3 rounded-xl flex items-center gap-2" variant="secondary" onClick={toggleAudio}>
+                    {audioMuted ? <MicOff className="w-5 h-5 text-red-500" /> : <Mic className="w-5 h-5 text-green-500" />}
+                    {audioMuted ? "Unmute" : "Mute"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Shortcut: M</TooltipContent>
+              </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button className="px-6 py-3 rounded-xl flex items-center gap-2" variant="secondary" onClick={toggleVideo}>
-                {videoOff ? <VideoOff className="w-5 h-5 text-red-500" /> : <Video className="w-5 h-5 text-green-500" />}
-                {videoOff ? "Start Video" : "Stop Video"}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Shortcut: V</TooltipContent>
-          </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="px-6 py-3 rounded-xl flex items-center gap-2" variant="secondary" onClick={toggleVideo}>
+                    {videoOff ? <VideoOff className="w-5 h-5 text-red-500" /> : <Video className="w-5 h-5 text-green-500" />}
+                    {videoOff ? "Start Video" : "Stop Video"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Shortcut: V</TooltipContent>
+              </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button className="px-6 py-3 rounded-xl flex items-center gap-2" variant="destructive" onClick={hangUp}>
-                <PhoneOff className="w-5 h-5" />
-                Hang Up
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Leave Meeting</TooltipContent>
-          </Tooltip>
-        </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="px-6 py-3 rounded-xl flex items-center gap-2" variant="destructive" onClick={hangUp}>
+                    <PhoneOff className="w-5 h-5" />
+                    Hang Up
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Leave Meeting</TooltipContent>
+              </Tooltip>
+            </div>
+          </>
+        )}
       </main>
     </TooltipProvider>
   );
