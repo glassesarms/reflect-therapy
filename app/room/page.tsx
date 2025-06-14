@@ -35,7 +35,8 @@ function RoomContent() {
       videoTileDidUpdate: (tile) => {
         if (!tile.boundAttendeeId) return;
         const el = tile.localTile ? localVideoRef.current : remoteVideoRef.current;
-        if (el) meetingSession.audioVideo.bindVideoElement(tile.tileId, el);
+        if (el && tile.tileId != null)
+          meetingSession.audioVideo.bindVideoElement(tile.tileId, el);
       },
     });
 
