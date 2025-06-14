@@ -13,12 +13,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
   try {
+    const baseUrl = process.env.SITE_URL || req.nextUrl.origin;
     if (booking.email) {
       await ses.send(
         new SendEmailCommand({
           Destination: { ToAddresses: [booking.email] },
           Message: {
-            Body: { Text: { Data: `Join your session at ${process.env.SITE_URL}${booking.roomUrl}` } },
+            Body: { Text: { Data: `Join your session at ${baseUrl}${booking.roomUrl}` } },
             Subject: { Data: 'Your session link' },
           },
           Source: process.env.EMAIL_FROM!,
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
       await sns.send(
         new PublishCommand({
           PhoneNumber: booking.phone,
-          Message: `Join your session at ${process.env.SITE_URL}${booking.roomUrl}`,
+          Message: `Join your session at ${baseUrl}${booking.roomUrl}`,
         })
       );
     }

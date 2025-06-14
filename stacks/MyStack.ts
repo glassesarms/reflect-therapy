@@ -25,8 +25,6 @@ export function MyStack({ stack }: StackContext) {
       EMAIL_FROM: process.env.EMAIL_FROM!,
     },
   });
-  const siteFunc = site.cdk?.function as unknown as lambda.Function | undefined;
-  siteFunc?.addEnvironment('SITE_URL', site.url || '');
 
   stack.addOutputs({
     SiteUrl: site.url,
