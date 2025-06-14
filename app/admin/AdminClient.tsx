@@ -3,6 +3,7 @@ import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import Calendar from './Calendar'
 import type { FormEvent } from 'react'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -108,56 +109,14 @@ export default function AdminClient({ past = false }: Props) {
         <CardHeader>
           <CardTitle>Bookings</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {bookings.map((b: any) => (
-            <Card key={b.id} className="border p-4 space-y-2">
-              <div className="font-medium">
-                {b.date} {b.time}
-              </div>
-              <div className="text-sm text-muted-foreground">{b.notes}</div>
-              {b.status === 'cancelled' && !past ? (
-                <div className="text-sm text-red-500">Cancelled</div>
-              ) : (
-                <div className="flex gap-2">
-                  {!past && (
-                    <>
-                      {!b.adminUrl ? (
-                        <Button
-                          size="sm"
-                          onClick={() => createRoom(b.id)}
-                          variant={
-                            new Date(`${b.date}T${b.time}:00Z`).getTime() - Date.now() >
-                              15 * 60 * 1000
-                              ? 'secondary'
-                              : 'default'
-                          }
-                        >
-                          Create Room
-                        </Button>
-                      ) : (
-                        <>
-                          <Button size="sm" onClick={() => router.push(b.adminUrl)}>
-                            Open Room
-                          </Button>
-                          <Button size="sm" onClick={() => sendLink(b.id)}>
-                            Send Link
-                          </Button>
-                        </>
-                      )}
-                      <Button size="sm" variant="destructive" onClick={() => cancelBooking(b.id)}>
-                        Cancel
-                      </Button>
-                    </>
-                  )}
-                  {b.transcript && (
-                    <Button size="sm" onClick={() => router.push(`/admin/transcripts/${b.id}`)}>
-                      Transcript
-                    </Button>
-                  )}
-                </div>
-              )}
-            </Card>
-          ))}
+        <CardContent>
+          <Calendar
+            bookings={bookings}
+            past={past}
+            createRoom={createRoom}
+            sendLink={sendLink}
+            cancelBooking={cancelBooking}
+          />
         </CardContent>
       </Card>
 
