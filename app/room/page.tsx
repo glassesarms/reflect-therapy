@@ -20,27 +20,36 @@ function RoomContent() {
 
   useEffect(() => {
     if (!meetingId || !attendeeId || !token) return;
-    const logger = new ConsoleLogger("Chime", LogLevel.WARN);
-    const deviceController = new DefaultDeviceController(logger);
-    const meetingSession = new DefaultMeetingSession(
-      new MeetingSessionConfiguration(
-        { Meeting: { MeetingId: meetingId } } as any,
-        { Attendee: { AttendeeId: attendeeId, JoinToken: token } } as any
-      ),
-      logger,
-      deviceController
-    );
-
-    meetingSession.audioVideo.addObserver({
-      videoTileDidUpdate: (tile) => {
-        if (!tile.boundAttendeeId) return;
-        const el = tile.localTile ? localVideoRef.current : remoteVideoRef.current;
-        if (el && tile.tileId != null)
-          meetingSession.audioVideo.bindVideoElement(tile.tileId, el);
-      },
-    });
+    let meetingSession: DefaultMeetingSession | undefined;
 
     async function start() {
+      const res = await fetch(`/api/meetings/${meetingId}`);
+      const data = await res.json();
+      if (!res.ok || !data.meeting) {
+        console.error(data.error || 'Failed to fetch meeting');
+        return;
+      }
+
+      const logger = new ConsoleLogger("Chime", LogLevel.WARN);
+      const deviceController = new DefaultDeviceController(logger);
+      meetingSession = new DefaultMeetingSession(
+        new MeetingSessionConfiguration(
+          { Meeting: data.meeting } as any,
+          { Attendee: { AttendeeId: attendeeId, JoinToken: token } } as any
+        ),
+        logger,
+        deviceController
+      );
+
+      meetingSession.audioVideo.addObserver({
+        videoTileDidUpdate: (tile) => {
+          if (!tile.boundAttendeeId) return;
+          const el = tile.localTile ? localVideoRef.current : remoteVideoRef.current;
+          if (el && tile.tileId != null)
+            meetingSession!.audioVideo.bindVideoElement(tile.tileId, el);
+        },
+      });
+
       const devices = await meetingSession.audioVideo.listVideoInputDevices();
       if (devices[0]) await meetingSession.audioVideo.startVideoInput(devices[0].deviceId);
       const audio = await meetingSession.audioVideo.listAudioInputDevices();
@@ -48,9 +57,10 @@ function RoomContent() {
       meetingSession.audioVideo.start();
       meetingSession.audioVideo.startLocalVideoTile();
     }
+
     start();
     return () => {
-      meetingSession.audioVideo.stop();
+      meetingSession?.audioVideo.stop();
     };
   }, [meetingId, attendeeId, token]);
 
