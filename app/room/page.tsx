@@ -46,6 +46,7 @@ function RoomContent() {
   const [videoOff, setVideoOff] = useState(false);
   const [loading, setLoading] = useState(true);
   const [transcriptionStarted, setTranscriptionStarted] = useState(false);
+  const [transcript, setTranscript] = useState("");
 
   // Setup video preview before joining
   useEffect(() => {
@@ -167,6 +168,25 @@ function RoomContent() {
     router.push("/");
   };
 
+  useEffect(() => {
+    if (!transcriptionStarted || !bookingId) return;
+    let timer: NodeJS.Timeout;
+    const fetchTranscript = async () => {
+      try {
+        const res = await fetch(`/api/bookings/${bookingId}/transcript`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.transcript) setTranscript(data.transcript);
+        }
+      } catch {
+        // ignore errors
+      }
+    };
+    fetchTranscript();
+    timer = setInterval(fetchTranscript, 5000);
+    return () => clearInterval(timer);
+  }, [transcriptionStarted, bookingId]);
+
   const startTranscription = async () => {
     if (!bookingId) return;
     const res = await fetch(`/api/bookings/${bookingId}/start-transcription`, {
@@ -208,7 +228,14 @@ function RoomContent() {
           <>
             {loading && <p className="text-center text-gray-600">Connecting to meeting...</p>}
             <div className="flex flex-col sm:flex-row gap-4 h-[75vh]">
-              <div className="flex-1 rounded-2xl overflow-hidden bg-neutral-900 shadow-lg">
+              <div className="w-full sm:w-1/3 max-h-64 sm:max-h-full rounded-2xl overflow-y-auto bg-neutral-900 shadow-lg p-2 text-sm whitespace-pre-wrap">
+                {transcript
+                  ? transcript
+                  : transcriptionStarted
+                  ? 'Waiting for transcript...'
+                  : 'Transcription not started.'}
+              </div>
+              <div className="w-full sm:w-1/3 rounded-2xl overflow-hidden bg-neutral-900 shadow-lg">
                 <video
                   ref={remoteVideoRef}
                   className="w-full h-full object-cover bg-neutral-900"
@@ -258,7 +285,9 @@ function RoomContent() {
               </Tooltip>
               {role === 'admin' && (
                 transcriptionStarted ? (
-                  <span className="px-3 py-3 text-green-500">Transcribing...</span>
+                  !transcript && (
+                    <span className="px-3 py-3 text-green-500">Transcribing...</span>
+                  )
                 ) : (
                   <Tooltip>
                     <TooltipTrigger asChild>
