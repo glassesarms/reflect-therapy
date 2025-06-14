@@ -11,7 +11,7 @@ describe('create-room API', () => {
 
   it('creates room for booking', async () => {
     const now = new Date(Date.now() + 5 * 60 * 1000);
-    bookings.push({ id: '1', date: now.toISOString().slice(0,10), time: now.toISOString().slice(11,16), notes: 'n' });
+    bookings.push({ id: '1', date: now.toISOString().slice(0,10), time: now.toISOString().slice(11,16), name: 'A', email: 'a', notes: 'n' });
     const req = new NextRequest('http://test', { body: JSON.stringify({ id: '1' }) });
     const res: any = await POST(req);
     assert.equal(res.status, 200);
@@ -28,7 +28,7 @@ describe('create-room API', () => {
   });
 
   it('creates room even if too early', async () => {
-    bookings.push({ id: '2', date: '2099-01-01', time: '10:00', notes: 'n' });
+    bookings.push({ id: '2', date: '2099-01-01', time: '10:00', name: 'B', email: 'b', notes: 'n' });
     const req = new NextRequest('http://test', { body: JSON.stringify({ id: '2' }) });
     const res: any = await POST(req);
     assert.equal(res.status, 200);
@@ -40,7 +40,7 @@ describe('create-room API', () => {
 
   it('returns existing room url', async () => {
     const now = new Date();
-    bookings.push({ id: '3', date: now.toISOString().slice(0,10), time: now.toISOString().slice(11,16), notes: 'n', roomUrl: 'foo' });
+    bookings.push({ id: '3', date: now.toISOString().slice(0,10), time: now.toISOString().slice(11,16), name: 'C', email: 'c', notes: 'n', roomUrl: 'foo' });
     const req = new NextRequest('http://test', { body: JSON.stringify({ id: '3' }) });
     const res: any = await POST(req);
     assert.equal(res.status, 200);

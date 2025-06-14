@@ -8,13 +8,17 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { date, time, notes } = await req.json();
+  const { date, time, name, email, phone, notes } = await req.json();
   const iso = new Date(`${date}T${time}Z`).toISOString();
   const booking: Booking = {
     id: randomUUID(),
     date: iso.slice(0, 10),
     time: iso.slice(11, 16),
+    name,
+    email,
+    phone,
     notes,
+    status: 'booked',
   };
   await createBooking(booking);
   return NextResponse.json(booking);
