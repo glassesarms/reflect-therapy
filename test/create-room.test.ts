@@ -2,7 +2,6 @@ import { strict as assert } from 'assert';
 import { POST } from '../app/api/create-room/route';
 import { NextRequest } from 'next/server';
 import { bookings } from '../lib/data';
-import twilio from 'twilio';
 
 describe('create-room API', () => {
   beforeEach(() => {
@@ -17,7 +16,7 @@ describe('create-room API', () => {
     assert.equal(res.status, 200);
     assert.equal(
       res.data.url,
-      '/video.html?room=RM_TEST&token=TOKEN'
+      '/room?meetingId=MID&attendeeId=AID&token=TOKEN'
     );
   });
 
@@ -34,7 +33,7 @@ describe('create-room API', () => {
     assert.equal(res.status, 200);
     assert.equal(
       res.data.url,
-      '/video.html?room=RM_TEST&token=TOKEN'
+      '/room?meetingId=MID&attendeeId=AID&token=TOKEN'
     );
   });
 

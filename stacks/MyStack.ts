@@ -20,13 +20,11 @@ export function MyStack({ stack }: StackContext) {
     bind: [table, blockouts],
     environment: {
       ADMIN_PASSWORD: process.env.ADMIN_PASSWORD!,
-      TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID!,
-      TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN!,
-      TWILIO_API_KEY: process.env.TWILIO_API_KEY!,
-      TWILIO_API_SECRET: process.env.TWILIO_API_SECRET!,
       BLOCKOUTS_TABLE_NAME: blockouts.tableName,
+      EMAIL_FROM: process.env.EMAIL_FROM!,
     },
   });
+  site.addEnvironment('SITE_URL', site.url);
 
   stack.addOutputs({
     SiteUrl: site.url,

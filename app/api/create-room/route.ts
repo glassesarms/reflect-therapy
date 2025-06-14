@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBooking, setRoomUrl } from '../../../lib/data';
-import twilio from 'twilio';
+import {
+  ChimeSDKMeetingsClient,
+  CreateMeetingCommand,
+  CreateAttendeeCommand,
+} from '@aws-sdk/client-chime-sdk-meetings';
 
 export async function POST(req: NextRequest) {
   const { id } = await req.json();
@@ -11,45 +15,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: booking.roomUrl });
   }
 
-
-  if (
-    !process.env.TWILIO_ACCOUNT_SID ||
-    !process.env.TWILIO_AUTH_TOKEN ||
-    !process.env.TWILIO_API_KEY ||
-    !process.env.TWILIO_API_SECRET
-  ) {
-    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
-  }
-
-  const twilioClient = twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-  );
-
+  const client = new ChimeSDKMeetingsClient({});
   try {
-    // omit deprecated room type so Twilio uses the default "group" room
-    const room = await twilioClient.video.v1.rooms.create({
-      uniqueName: id,
-    });
-
-    const AccessToken = twilio.jwt.AccessToken;
-    const VideoGrant = AccessToken.VideoGrant;
-    const token = new AccessToken(
-      process.env.TWILIO_ACCOUNT_SID!,
-      process.env.TWILIO_API_KEY!,
-      process.env.TWILIO_API_SECRET!,
-      { identity: `admin-${id}` }
+    const meetingRes = await client.send(
+      new CreateMeetingCommand({
+        ClientRequestToken: id,
+        MediaRegion: process.env.AWS_REGION || 'us-east-1',
+        ExternalMeetingId: id,
+      })
     );
-    token.addGrant(new VideoGrant({ room: room.sid }));
-    const joinUrl = `/video.html?room=${encodeURIComponent(
-      room.sid
-    )}&token=${encodeURIComponent(token.toJwt())}`;
 
+    const attendeeRes = await client.send(
+      new CreateAttendeeCommand({
+        MeetingId: meetingRes.Meeting!.MeetingId!,
+        ExternalUserId: `admin-${id}`,
+      })
+    );
+
+    const joinUrl = `/room?meetingId=${encodeURIComponent(
+      meetingRes.Meeting!.MeetingId!
+    )}&attendeeId=${encodeURIComponent(attendeeRes.Attendee!.AttendeeId!)}&token=${encodeURIComponent(
+      attendeeRes.Attendee!.JoinToken!
+    )}`;
     await setRoomUrl(id, joinUrl);
     return NextResponse.json({ url: joinUrl });
   } catch (err: any) {
-    console.error('Twilio create room failed', err);
-    const message = err && typeof err === 'object' && 'message' in err ? err.message : 'Failed to create room';
+    console.error('Chime create meeting failed', err);
+    const message = err && typeof err === 'object' && 'message' in err ? err.message : 'Failed to create meeting';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
