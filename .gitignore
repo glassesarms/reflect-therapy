@@ -2,6 +2,7 @@
 node_modules/
 .pnpm/
 .pnpm-debug.log*
+package-lock.json
 
 # Build outputs
 .next/
@@ -11,6 +12,8 @@ dist/
 # SST build artifacts
 .stacks/
 .sst/
+sst-env.d.ts
+.open-next
 
 # Environment files
 .env
