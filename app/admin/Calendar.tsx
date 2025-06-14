@@ -1,6 +1,8 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 interface Booking {
   id: string
@@ -23,11 +25,13 @@ interface Props {
 export default function Calendar({ bookings, past, createRoom, sendLink, cancelBooking }: Props) {
   const router = useRouter()
 
-  const today = new Date()
-  const ref = new Date(today)
-  if (past) ref.setDate(ref.getDate() - 7)
-  const weekStart = new Date(ref)
-  weekStart.setDate(ref.getDate() - weekStart.getDay())
+  const [weekOffset, setWeekOffset] = useState(past ? -1 : 0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const base = new Date()
+  base.setDate(base.getDate() + weekOffset * 7 + (past ? -7 : 0))
+  const weekStart = new Date(base)
+  weekStart.setDate(base.getDate() - weekStart.getDay())
 
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(weekStart)
@@ -43,14 +47,33 @@ export default function Calendar({ bookings, past, createRoom, sendLink, cancelB
   })
   dayKeys.forEach(d => byDay.get(d)!.sort((a, b) => a.time.localeCompare(b.time)))
 
-  const hours = Array.from({ length: 10 }, (_, i) => 8 + i)
-
+  const hours = Array.from({ length: 24 }, (_, i) => i)
   const cellClass = 'border min-h-[4rem] p-1 text-xs'
+
+  useEffect(() => {
+    const h = new Date().getHours()
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = Math.max(0, (h - 4) * 64)
+    }
+  }, [])
 
   return (
     <div className="overflow-x-auto">
-      <div className="grid" style={{ gridTemplateColumns: '80px repeat(7, minmax(140px,1fr))' }}>
-        <div></div>
+      <div className="flex items-center justify-between mb-2">
+        <Button variant="ghost" size="icon" onClick={() => setWeekOffset(weekOffset - 1)}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="font-medium">
+          {weekStart.toLocaleDateString()} -{' '}
+          {days[6].toLocaleDateString()}
+        </div>
+        <Button variant="ghost" size="icon" onClick={() => setWeekOffset(weekOffset + 1)}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+      <div ref={scrollRef} className="max-h-[60vh] overflow-y-auto">
+        <div className="grid" style={{ gridTemplateColumns: '80px repeat(7, minmax(140px,1fr))' }}>
+          <div></div>
         {days.map(d => (
           <div key={d.toDateString()} className="border p-2 text-center font-medium bg-muted">
             {d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
@@ -122,5 +145,6 @@ export default function Calendar({ bookings, past, createRoom, sendLink, cancelB
         ))}
       </div>
     </div>
+  </div>
   )
 }
