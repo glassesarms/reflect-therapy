@@ -22,3 +22,5 @@ jobs:
           AWS_REGION: ap-southeast-2
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          BOOKINGS_TABLE_NAME: ${{ secrets.BOOKINGS_TABLE_NAME }}
+          BLOCKOUTS_TABLE_NAME: ${{ secrets.BLOCKOUTS_TABLE_NAME }}
