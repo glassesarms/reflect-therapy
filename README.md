@@ -34,7 +34,14 @@ BOOKINGS_TABLE_NAME=name_of_dynamodb_table
 BLOCKOUTS_TABLE_NAME=name_of_blockouts_table
 ```
 
-When deploying via GitHub Actions, include the same variables as repository secrets so the site can access them in production.
+When deploying via GitHub Actions, set these values as repository secrets so the workflow can inject them:
+
+```
+ADMIN_PASSWORD
+EMAIL_FROM
+BOOKINGS_TABLE_NAME
+BLOCKOUTS_TABLE_NAME
+```
 
 3. Run the development server
 
