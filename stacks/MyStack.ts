@@ -1,4 +1,5 @@
 import { StackContext, NextjsSite, Table } from 'sst/constructs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 
 export function MyStack({ stack }: StackContext) {
   const table = new Table(stack, 'Bookings', {
@@ -24,7 +25,9 @@ export function MyStack({ stack }: StackContext) {
       EMAIL_FROM: process.env.EMAIL_FROM!,
     },
   });
-  site.addEnvironment('SITE_URL', site.url);
+  if (site.cdk?.function) {
+    (site.cdk.function as lambda.Function).addEnvironment('SITE_URL', site.url || '');
+  }
 
   stack.addOutputs({
     SiteUrl: site.url,
